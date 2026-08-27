@@ -42,7 +42,7 @@ function render(): void {
 
   app.innerHTML = `
     <header class="topbar">
-      <a class="wordmark" href="#main" aria-label="Season Gap Garden home"><span class="wordmark-mark">SG</span><span>Season Gap Garden</span></a>
+      <a class="wordmark" href="#main"><span class="wordmark-mark" aria-hidden="true">SG</span><span>Season Gap Garden</span></a>
       <nav aria-label="Garden notebook">
         <a href="#beds">Beds</a><a href="#gaps">Gap view</a><a href="#templates">Crop notes</a><a href="#data">Data</a>
       </nav>
