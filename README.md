@@ -1,14 +1,43 @@
 # Season Gap Garden
 
-Live: https://season-gap-garden.sociobot.in — built by the Param Factory (`pwa-offline`).
+Season Gap Garden is a private, offline crop-turnover notebook for small-space food gardeners. Record when each real bed is occupied, see the windows between crops, and fill a window from your own duration notes or mark it as intentional rest. It does date arithmetic, not agronomic or climate recommendations.
 
-See `.factory/brief.json` for the researched problem this solves and `.factory/design.md` for the visual system.
+The app is local-first: beds, plantings, crop notes, and settings live in IndexedDB. Users can export a season CSV or a complete JSON backup. It installs as a PWA and keeps working after the network disappears.
+
+Live: <https://season-gap-garden.sociobot.in>
 
 ## Develop
 
-```
-npm install
+Requires Node.js 20 or newer.
+
+```sh
+npm ci
 npm run dev
-npm test
-npm run build   # -> dist/
 ```
+
+The exact production build command is:
+
+```sh
+npm run build
+```
+
+The static deploy output is `dist/`, with `dist/index.html` at its root. No environment variables are needed for the free app. The one-time paid unlock talks only to the Sociobot billing API; the factory registers the product separately.
+
+## Verify
+
+```sh
+npm test          # unit tests
+npm run build     # type-check and reproducible production bundle
+npm run test:e2e  # desktop + 390px flow, axe, and offline reload
+npm run check     # all of the above
+```
+
+Playwright is pinned to 1.58.2. In the factory image its Chromium browser is already installed at `$PLAYWRIGHT_BROWSERS_PATH`; elsewhere, run `npx playwright install chromium` once.
+
+## Product boundaries
+
+- Free: 3 beds, 5 successor notes, unlimited crop/rest entries, gap planning, offline use, CSV, and backup/restore.
+- One-time US$9 license: unlimited beds and successor notes. Checkout and refunds are handled by Sociobot / Dodo.
+- No accounts, trackers, weather feed, plant encyclopedia, companion-plant claims, pesticide guidance, or food-safety advice.
+
+See [the researched brief](.factory/brief.json), [visual thesis](.factory/design.md), and [handoff](.factory/handoff.md). The code is MIT licensed.
