@@ -1,0 +1,8 @@
+{
+  "tool": "/opt/fleet/lib/gen-image.sh",
+  "deployment": "factory-image",
+  "date": "2026-08-27",
+  "size": "1536x1024",
+  "quality": "medium",
+  "prompt": "Use case: illustration-story. Asset type: compact landing and workspace header illustration. Top-down open gardener's laboratory notebook on warm unbleached paper with a faint sage graph grid. One continuous crop-turnover study in three hand-drawn vignettes: a leafy crop in a narrow raised bed, then the same bed as freshly cleared dark soil, then neat young seedlings, connected by pencilled arrows and date-tick marks without legible words or numbers. Tactile colored-pencil, dry ink, graphite, restrained linocut texture, imperfect field-journal observation, sophisticated not childish. 3:2 landscape, strong left-to-right rhythm, generous calm negative space at edges. Soft overcast garden-shed daylight, subtle paper tooth and one faint soil thumbprint. Warm paper, deep leaf green, graphite, muted marigold, brick accent. Botanically plausible generic plants. No people, no labels, no user interface, no logos, no text, no watermark. Avoid photorealism, glossy 3D, corporate vector art, gradients, neon, crowded collage, readable handwriting, brands, seed packets."
+}

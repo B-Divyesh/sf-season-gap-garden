@@ -1,0 +1,10 @@
+{
+  "slug": "season-gap-garden",
+  "title": "Season Gap Garden",
+  "territory": "utilities",
+  "user": "A small-space food gardener who wants to spot an empty bed window and choose a simple follow-on crop from their own past planting notes.",
+  "smallest_useful_product": "Offline bed list, sow/transplant/expected-clear dates, a calendar strip showing open windows, user-defined successor templates, and season CSV export.",
+  "artifact_class": "pwa-offline",
+  "monetization": "one-time",
+  "constraints": "No climate, pesticide, or food-safety claims; use only user-defined crop durations in v1; portable local data."
+}
