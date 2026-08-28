@@ -33,7 +33,12 @@ Exact local evidence, 2026-08-28:
 
 ## Deployment
 
-Static deploy is performed by pushing this commit to `main`; publish `dist/`. Record the resulting commit and live parity check here after push.
+- Repair commit `f5c4523516b5dfa73c2cc554d83af7b0f62c2092` was pushed to `main`.
+- Deployed with the work-order static command: `/opt/fleet/lib/deploy-static.sh season-gap-garden dist`. Azure Static Web Apps deployment `a0242670-7e82-41ce-acef-6812a918ddbd` succeeded; the configured custom domain was `Ready` and HTTPS returned 200.
+- Live parity: `https://season-gap-garden.sociobot.in/` and local `dist/index.html` have matching SHA-256 `4446dabbb1ef27a5dd15abe390c9e5a0233c91b6a05a501d20693897b59674c6` and 53,599 bytes.
+- `/opt/fleet/lib/verify-url.sh` against the live URL passed: 826 ms load, zero console/page errors, title/lang, one h1, main landmark, zero missing image alts, and zero unlabeled buttons.
+- Live 390px regression: the verifier JSON was rejected with `This backup has an invalid bed 1 ID.`, no confirmation appeared, the existing `Live-safe bed` survived reload, only the product origin was requested during normal load, the active service worker was `/sw.js`, and `scrollWidth === clientWidth === 390`.
+- Response-policy check: HTTPS response includes HSTS, `Referrer-Policy: strict-origin-when-cross-origin`, and `X-Content-Type-Options: nosniff`; CSP, Permissions-Policy, and frame policy remain hosting follow-ups.
 
 ## Known limitations
 
