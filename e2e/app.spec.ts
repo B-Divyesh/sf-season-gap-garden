@@ -40,9 +40,45 @@ test('has no serious accessibility findings on a 390px screen', async ({ page })
   await expect(page.locator('body')).not.toHaveCSS('overflow-x', 'hidden');
 });
 
+test('supports the keyboard dialog path and restores focus to its trigger', async ({ page }) => {
+  await page.goto('/');
+  const addBed = page.getByRole('button', { name: 'Add a bed' }).first();
+  await addBed.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByLabel('Bed name')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(addBed).toBeFocused();
+});
+
 test('legal pages are available as static offline-friendly routes', async ({ page }) => {
   await page.goto('/privacy/');
   await expect(page.getByRole('heading', { name: 'Privacy, in plain soil' })).toBeVisible();
   await page.goto('/terms/');
   await expect(page.getByRole('heading', { name: 'Terms of use' })).toBeVisible();
+});
+
+test('rejects a malformed backup and keeps the existing notebook after reload', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Add a bed' }).first().click();
+  await page.getByLabel('Bed name').fill('Safe north bed');
+  await page.getByRole('dialog').getByRole('button', { name: 'Add bed', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Safe north bed', exact: true })).toBeVisible();
+
+  let confirmationShown = false;
+  page.on('dialog', async (dialog) => {
+    confirmationShown = true;
+    await dialog.dismiss();
+  });
+  await page.locator('#import-file').setInputFiles({
+    name: 'broken-garden.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from('{"version":1,"beds":[{}],"plantings":[],"templates":[],"settings":{"seasonStart":"2026-03-01","seasonEnd":"2026-11-01"}}'),
+  });
+
+  await expect(page.locator('#toast')).toContainText('bed 1 ID');
+  expect(confirmationShown).toBe(false);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Safe north bed', exact: true })).toBeVisible();
 });

@@ -1,4 +1,4 @@
-const VERSION = 'season-gap-v4';
+const VERSION = 'season-gap-v5';
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const SHELL = ['/offline.html', '/manifest.webmanifest', '/assets/garden-study.webp', '/fonts/atkinson-regular.woff2', '/fonts/atkinson-bold.woff2', '/fonts/caveat-variable.woff2', '/icons/icon.svg', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png'];

@@ -230,7 +230,15 @@ function openDialog(content: string, onSubmit?: (form: HTMLFormElement) => Promi
     try { await onSubmit(form); } catch (error) { showFormError(error instanceof Error ? error.message : 'Could not save this entry.'); }
   });
   dialog.showModal();
-  dialog.querySelector<HTMLElement>('input, select, button')?.focus();
+  // Put people straight into the first editable field, not the decorative
+  // close control. The close event also covers Escape, which does not call
+  // our explicit close handler.
+  dialog.addEventListener('close', restoreDialogFocus, { once: true });
+  window.setTimeout(() => {
+    const initialControl = dialog.querySelector<HTMLElement>('input:not([type="radio"]), select, textarea')
+      || dialog.querySelector<HTMLElement>('button');
+    initialControl?.focus();
+  }, 0);
 }
 
 function dialogShell(title: string, body: string, submit = 'Save'): string {
@@ -240,7 +248,10 @@ function dialogShell(title: string, body: string, submit = 'Save'): string {
 function closeDialog(): void {
   const dialog = getDialog();
   dialog.close();
-  lastTrigger?.focus();
+}
+
+function restoreDialogFocus(): void {
+  if (lastTrigger?.isConnected) lastTrigger.focus();
 }
 
 function showFormError(message: string): void {

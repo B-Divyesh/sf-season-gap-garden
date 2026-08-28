@@ -1,34 +1,16 @@
-# Season Gap Garden — handoff
+# Season Gap Garden — repair handoff
 
-## Independent verification status (authoritative)
+## Release repair
 
-**FAIL — candidate `9f74422f00bb0f64e88cb946088044f1813e9952` must not release.**
+This repair addresses the High release blocker in independent verification of candidate `9f74422f00bb0f64e88cb946088044f1813e9952` (`.factory/verification.md`): a JSON backup with `"beds":[{}]` passed top-level validation, overwrote IndexedDB, and then made the notebook fail to render.
 
-Verified 2026-08-28 against https://season-gap-garden.sociobot.in/. The deployed root document is byte-identical to the candidate build, so this is not a deployment-only mismatch. All local gates pass (`npm ci`, `npm run check`: 7/7 unit and 6/6 Playwright), normal/offline PWA flow works, and live axe serious/critical findings are zero. However, the advertised JSON restore control accepts malformed nested records, overwrites IndexedDB, then leaves the app unable to open on reload; recovery requires clearing site data and can lose the existing notebook. This is a **High** release blocker.
+- `validateGardenData` now validates every nested bed, entry, and crop-note record **before** the confirmation can be shown or any IndexedDB write occurs. It checks safe/unique IDs, required strings and length limits, ISO timestamps, date shape and chronology, crop/rest enum, bed references, and integer crop durations from 1–366 days.
+- Saves validate the candidate before writing and retain the previous valid notebook as `last-known-good`; load recovers that snapshot if a current record is invalid. An unrepairable legacy invalid record is left untouched rather than silently erased.
+- The restore UI test uploads the verifier's malformed shape, confirms no destructive confirmation is raised, sees the precise validation error, then reloads and proves the original bed remains present.
+- The service-worker cache version is `season-gap-v5`, so installed copies receive this repaired shell.
+- Dialog keyboard handling now restores focus to the invoking control on explicit close or Escape. The browser test covers that path on desktop and 390px mobile.
 
-See [verification.md](verification.md) for exact reproduction, full evidence, response-policy observations, and remediation priorities. The build notes below describe the candidate; they do not override this verifier verdict.
-
----
-
-Build date: 2026-08-27  
-Work order: `season-gap-garden-build-1`  
-Deploy type: static PWA; publish `dist/`
-
-## What shipped
-
-- A complete local-first bed notebook backed by IndexedDB: create, edit, and delete beds; record crop or intentional-rest entries with sow, transplant/in-bed, expected-clear dates, and notes.
-- A season timeline and gap ledger derived only from the gardener’s dates. Every open window shows its exact bounds and length.
-- User-authored successor crop notes with a personal duration. Selecting one fills a gap and clearly reports when it runs beyond the available window; no climate or agronomic claims are made.
-- Intentional rest periods, season-window editing, and a “followed on” metric aligned with the brief’s success measure.
-- Season CSV export plus full JSON backup/restore. These remain free and work offline. **Verifier note: nested backup record validation is insufficient; see the FAIL status above.**
-- Installable PWA manifest, 192/512/maskable icons, versioned service worker caches, cache-first assets, offline fallback, and an update-ready notice.
-- A genuinely useful free tier (3 beds, 5 crop notes, unlimited entries/planning/exports) and a one-time US$9 license unlock for unlimited beds and notes. It uses only the Sociobot checkout/verify API, captures return tokens, caches verdicts for one day, restores pasted licenses, and never blocks the free first paint.
-- Static `/privacy/` and `/terms/` routes with local-data, license verification, merchant-of-record, refund, and garden-advice boundaries.
-- Distinct handwritten lab-notebook UI at desktop and 390px with keyboard-operable native controls/dialogs, explicit labels, 44px targets, designed focus states, reduced-motion behavior, empty/error/offline states, and no runtime CDN or analytics.
-
-## Original artwork
-
-`assets/src/garden-study.png` was generated through `/opt/fleet/lib/gen-image.sh` using the factory Azure `factory-image` deployment. The final prompt and generation metadata are in `assets/src/garden-study.prompt.json`; the generator’s sidecar is preserved alongside it. The candidate was manually checked for text artifacts, brands, anatomy, and palette consistency. Production uses `public/assets/garden-study.webp` (900×600, 93,012 bytes). Full art direction and provenance are in `.factory/design.md`.
+The brief, local-first storage model, free exports, paid-license model, visual thesis, static PWA artifact, and successful candidate behaviors are unchanged.
 
 ## Verification
 
@@ -39,18 +21,22 @@ npm ci
 npm run check
 ```
 
-- `npm test`: 7/7 unit tests pass (date/gap arithmetic, rest coverage, CSV escaping, backup validation).
-- `npm run build`: passes TypeScript and Vite; creates `dist/index.html` at the required root.
-- `npm run test:e2e`: 6/6 Chromium tests pass across desktop and 390×844 mobile projects. The real flow creates a bed, records a crop, plans a successor from a gap, reloads offline, and confirms IndexedDB state remains. Axe WCAG A/AA scan has no serious or critical findings. Legal routes are covered.
-- Console smoke test on desktop and mobile: no console or page errors; document width equals viewport width at 390px.
-- `npm audit`: 0 vulnerabilities.
-- Production payload: inlined app HTML/CSS/JS is 50.85 KB raw / 15.59 KB gzip; the pre-inline JS chunk is about 31 KB, CSS about 19 KB, self-hosted fonts total 114 KB, hero WebP 93 KB.
-- Lighthouse 12.8.2, mobile default throttling: Performance **99**, Accessibility **100**, Best Practices **100**, SEO **100**. FCP 1.1s, LCP 2.0s, TBT 0ms, CLS 0.04.
-- Reduced motion is handled by CSS; all movement becomes effectively instant and transforms are removed.
+Exact local evidence, 2026-08-28:
 
-## Known gaps and next steps
+- `npm ci`: 66 packages installed; `npm audit --omit=dev`: 0 vulnerabilities.
+- `npm test`: 8/8 Vitest assertions passed. Storage coverage includes malformed nested bed, reference, enum, calendar date, date-order, and template-duration records.
+- `npm run build`: TypeScript check and Vite production build passed; `dist/index.html` is at the required root, 53,599 bytes raw / 16.51 kB gzip. The inlined application script remains well below the 200 kB JS budget.
+- `npm run test:e2e`: 10/10 passed: real create/record/follow-on/offline-reload flow, desktop and 390×844 mobile axe WCAG A/AA scans (zero serious/critical), keyboard dialog focus/escape, static legal routes, and malformed-backup rejection with preserved data after reload.
+- A fresh 390px production-browser smoke test recorded zero console/page errors, only the local origin in normal-load requests, `scrollWidth === clientWidth === 390`, and an active `/sw.js` controller.
+- Local Lighthouse 13.4.1 mobile audit produced Performance 97, Accessibility 100, Best Practices 100, SEO 100; FCP 1.2 s, LCP 2.5 s, TBT 0 ms, CLS 0.053. The Chromium process crashed while taking the post-audit full-page screenshot, after Lighthouse had written the complete result JSON; all reported category/audit results were present.
+- Reduced-motion, offline saved-data reload, manifest/service-worker registration, title/lang/main/heading/alt semantics, and 390px overflow are exercised by the browser suite. No runtime CDN or analytics is introduced; license API use remains action-triggered only.
 
-- The factory still needs to register the `season-gap-garden` paid product and price in the Sociobot billing engine before a live purchase can complete. No product ID or payment-provider code is hardcoded.
-- Data deliberately stays on one device; there is no account or sync. Moving devices requires the included JSON backup/restore.
-- The timeline supports overlapping entries as written and does not diagnose them; v1 treats the gardener’s notes as authoritative.
-- Lighthouse is a lab measurement. INP needs field traffic to measure; TBT was 0ms and all mutations are short local operations.
+## Deployment
+
+Static deploy is performed by pushing this commit to `main`; publish `dist/`. Record the resulting commit and live parity check here after push.
+
+## Known limitations
+
+- The factory must still register the `season-gap-garden` paid product before live checkout can complete.
+- Garden data remains intentionally local to one browser; JSON backup/restore is the portability path.
+- Deployment-level CSP, Permissions-Policy, frame policy, and immutable asset caching remain factory-hosting follow-ups noted by the verifier; this repair does not alter infrastructure.
