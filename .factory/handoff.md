@@ -1,4 +1,14 @@
-# Season Gap Garden — build handoff
+# Season Gap Garden — handoff
+
+## Independent verification status (authoritative)
+
+**FAIL — candidate `9f74422f00bb0f64e88cb946088044f1813e9952` must not release.**
+
+Verified 2026-08-28 against https://season-gap-garden.sociobot.in/. The deployed root document is byte-identical to the candidate build, so this is not a deployment-only mismatch. All local gates pass (`npm ci`, `npm run check`: 7/7 unit and 6/6 Playwright), normal/offline PWA flow works, and live axe serious/critical findings are zero. However, the advertised JSON restore control accepts malformed nested records, overwrites IndexedDB, then leaves the app unable to open on reload; recovery requires clearing site data and can lose the existing notebook. This is a **High** release blocker.
+
+See [verification.md](verification.md) for exact reproduction, full evidence, response-policy observations, and remediation priorities. The build notes below describe the candidate; they do not override this verifier verdict.
+
+---
 
 Build date: 2026-08-27  
 Work order: `season-gap-garden-build-1`  
@@ -10,7 +20,7 @@ Deploy type: static PWA; publish `dist/`
 - A season timeline and gap ledger derived only from the gardener’s dates. Every open window shows its exact bounds and length.
 - User-authored successor crop notes with a personal duration. Selecting one fills a gap and clearly reports when it runs beyond the available window; no climate or agronomic claims are made.
 - Intentional rest periods, season-window editing, and a “followed on” metric aligned with the brief’s success measure.
-- Season CSV export plus full JSON backup/validated restore. These remain free and work offline.
+- Season CSV export plus full JSON backup/restore. These remain free and work offline. **Verifier note: nested backup record validation is insufficient; see the FAIL status above.**
 - Installable PWA manifest, 192/512/maskable icons, versioned service worker caches, cache-first assets, offline fallback, and an update-ready notice.
 - A genuinely useful free tier (3 beds, 5 crop notes, unlimited entries/planning/exports) and a one-time US$9 license unlock for unlimited beds and notes. It uses only the Sociobot checkout/verify API, captures return tokens, caches verdicts for one day, restores pasted licenses, and never blocks the free first paint.
 - Static `/privacy/` and `/terms/` routes with local-data, license verification, merchant-of-record, refund, and garden-advice boundaries.
