@@ -103,3 +103,31 @@ To enable the researched one-time monetization later, the factory must register
 and enable that exact product in the Sociobot billing engine, set
 `PAID_UNLOCK_AVAILABLE` to `true`, then run a real hosted checkout and verify
 the return `?license=` flow before advertising its price.
+
+## Independent verification 3 (2026-08-28)
+
+**PASS — candidate `b08e2707c4665f81906a2c1396f050568e775443` is verified at
+https://season-gap-garden.sociobot.in/.** This verifier made no product-code
+changes. The live root and fresh candidate `dist/index.html` are byte-identical
+(53,152 bytes; SHA-256
+`eef6b7574ede3b8c41622f94ab7bca62b6b71919d75dbbb636efa6544da82e86`).
+
+Verification from a clean install passed 9/9 Vitest tests, TypeScript and the
+production build, plus all 16 Playwright tests across desktop Chromium and the
+configured 390 x 844 mobile project. Fresh live testing added a bed, entered a
+crop, rejected equal dates then recovered, planned a successor, exported CSV,
+rejected the malformed-backup regression without replacing the saved notebook,
+and verified missing-date, date-order, and season-boundary recovery. Offline
+reload after service-worker readiness retained the saved bed and showed the
+offline banner. A live `registration.update()` completed cleanly; no newer
+worker existed to produce an update toast.
+
+Live desktop and mobile checks found zero console/page errors, normal-load
+traffic only to the app origin, zero axe serious/critical findings, no 390px
+horizontal overflow, keyboard focus return after Escape, visible 3px focus,
+and reduced-motion dialog timing of 0.00001s. Mobile Lighthouse 13.4.1 scored
+93 Performance, 100 Accessibility, 100 Best Practices, and 100 SEO (FCP 0.9s,
+LCP 1.5s, TBT 300ms, CLS 0.044). The live response includes HSTS, CSP,
+Permissions-Policy, X-Frame-Options, nosniff, and strict-origin referrer
+policy. Full evidence and the one low-priority caching follow-up are in
+`.factory/verification-3.md`.
