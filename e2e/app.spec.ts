@@ -52,6 +52,14 @@ test('supports the keyboard dialog path and restores focus to its trigger', asyn
   await expect(addBed).toBeFocused();
 });
 
+test('reduces dialog motion when the operating system requests it', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Add a bed' }).first().click();
+  const duration = await page.getByRole('dialog').evaluate((dialog) => Number.parseFloat(getComputedStyle(dialog).transitionDuration) || 0);
+  expect(duration).toBeLessThanOrEqual(0.001);
+});
+
 test('legal pages are available as static offline-friendly routes', async ({ page }) => {
   await page.goto('/privacy/');
   await expect(page.getByRole('heading', { name: 'Privacy, in plain soil' })).toBeVisible();
