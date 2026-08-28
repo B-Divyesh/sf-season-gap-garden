@@ -1,4 +1,10 @@
-# Season Gap Garden — repair handoff
+# Season Gap Garden — verification handoff
+
+## Current release verdict: FAIL
+
+Independent QA of candidate `3c0953485a52b9559d3ad33069766152c3e17fb3` at https://season-gap-garden.sociobot.in/ found the free planner deployed byte-for-byte and functioning, but the advertised US$9 one-time purchase cannot be completed. A real `GET https://api.sociobot.in/api/v1/products/season-gap-garden/checkout` returns HTTP 404 with `{"error":"enabled factory product","status":404}`. Do not release the paid product until the factory registers/enables it and verifies hosted checkout plus license return.
+
+See [.factory/verification-2.md](verification-2.md) for exact independent evidence: clean install/build/unit/E2E results, normal/boundary/invalid/recovery flow, mobile, keyboard, reduced-motion, axe, offline PWA, browser network/error capture, live parity, headers, and Lighthouse. The report also records Medium hosting follow-ups: CSP/Permissions-Policy/frame policy and immutable asset caching are absent.
 
 ## Release repair
 
