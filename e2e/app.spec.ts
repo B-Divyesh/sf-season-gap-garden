@@ -59,6 +59,33 @@ test('legal pages are available as static offline-friendly routes', async ({ pag
   await expect(page.getByRole('heading', { name: 'Terms of use' })).toBeVisible();
 });
 
+test('does not advertise a checkout that the billing catalog has not enabled', async ({ page }) => {
+  const requestOrigins = new Set<string>();
+  page.on('request', (request) => requestOrigins.add(new URL(request.url()).origin));
+  await page.goto('/');
+  await expect(page.getByText('Unlimited local notebook')).toBeVisible();
+  await expect(page.getByText('Purchases are not available until the factory enables this product’s checkout.')).toBeVisible();
+  await expect(page.locator('a[href*="api.sociobot.in/api/v1/products/season-gap-garden/checkout"]')).toHaveCount(0);
+  expect([...requestOrigins]).toEqual(['http://127.0.0.1:4173']);
+
+  for (let index = 1; index <= 4; index += 1) {
+    await page.getByRole('button', { name: 'Add a bed' }).first().click();
+    await page.getByLabel('Bed name').fill(`Unlimited bed ${index}`);
+    await page.getByRole('dialog').getByRole('button', { name: 'Add bed', exact: true }).click();
+  }
+  await expect(page.getByRole('heading', { name: 'Unlimited bed 4', exact: true })).toBeVisible();
+});
+
+test('captures a returned license token and cleans the address bar', async ({ page }) => {
+  await page.route('https://api.sociobot.in/api/v1/products/season-gap-garden/verify?license=returned-license', (route) => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ valid: true, reason: 'ok' }),
+  }));
+  await page.goto('/?license=returned-license');
+  await expect(page).toHaveURL('http://127.0.0.1:4173/');
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('sb_license:season-gap-garden'))).toBe('returned-license');
+});
+
 test('rejects a malformed backup and keeps the existing notebook after reload', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Add a bed' }).first().click();

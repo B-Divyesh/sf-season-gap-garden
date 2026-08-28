@@ -1,6 +1,6 @@
 import './styles.css';
 import { addDays, daysBetween, findGaps, formatDate, monthTicks, percentAcross, plantingStart } from './date';
-import { CHECKOUT_URL, cachedUnlock, captureLicense, clearLicense, storeLicense, storedLicense, verifyLicense } from './license';
+import { PAID_UNLOCK_AVAILABLE, availableCheckoutUrl, cachedUnlock, captureLicense, clearLicense, storeLicense, storedLicense, verifyLicense } from './license';
 import { downloadFile, loadData, saveData, toCsv, validateGardenData } from './storage';
 import type { CropTemplate, Gap, GardenData, Planting } from './types';
 
@@ -46,7 +46,7 @@ function render(): void {
       <nav aria-label="Garden notebook">
         <a href="#beds">Beds</a><a href="#gaps">Gap view</a><a href="#templates">Crop notes</a><a href="#data">Data</a>
       </nav>
-      <button class="unlock-button ${unlocked ? 'is-unlocked' : ''}" data-action="license">${icon(unlocked ? 'seed' : 'lock')} ${unlocked ? 'Garden unlocked' : 'Unlock unlimited'}</button>
+      ${PAID_UNLOCK_AVAILABLE ? `<button class="unlock-button ${unlocked ? 'is-unlocked' : ''}" data-action="license">${icon(unlocked ? 'seed' : 'lock')} ${unlocked ? 'Garden unlocked' : 'Unlock unlimited'}</button>` : '<p class="notebook-state">Unlimited local notebook</p>'}
     </header>
     <div class="connection-banner" id="connection-banner" role="status" hidden>You’re offline. Your notebook still works and saves on this device.</div>
     <main id="main">
@@ -116,9 +116,9 @@ function render(): void {
         </div>
       </section>
 
-      <aside class="paid-note" aria-label="Unlimited garden license">
-        <div><p class="hand-note">for larger plots</p><h2>${unlocked ? 'Unlimited garden unlocked' : 'Keep a bigger notebook'}</h2><p>${unlocked ? 'This device can keep unlimited beds and crop notes.' : 'The free garden includes 3 beds and 5 crop notes. A one-time US$9 license removes both limits—no subscription.'}</p>${licenseNotice ? `<p class="license-notice">${escapeHtml(licenseNotice)}</p>` : ''}</div>
-        ${unlocked ? `<button class="button quiet-on-dark" data-action="license">Manage license</button>` : `<button class="button marigold" data-action="license">See the one-time unlock</button>`}
+      <aside class="paid-note" aria-label="Notebook availability">
+        <div><p class="hand-note">your whole notebook</p><h2>${PAID_UNLOCK_AVAILABLE ? (unlocked ? 'Unlimited garden unlocked' : 'Keep a bigger notebook') : 'Keep every bed together'}</h2><p>${PAID_UNLOCK_AVAILABLE ? (unlocked ? 'This device can keep unlimited beds and crop notes.' : 'The free garden includes 3 beds and 5 crop notes. A one-time US$9 license removes both limits—no subscription.') : 'All beds, crop notes, entries, gap planning, and exports are available on this device. Purchases are not available until the factory enables this product’s checkout.'}</p>${licenseNotice ? `<p class="license-notice">${escapeHtml(licenseNotice)}</p>` : ''}</div>
+        ${PAID_UNLOCK_AVAILABLE ? (unlocked ? `<button class="button quiet-on-dark" data-action="license">Manage license</button>` : `<button class="button marigold" data-action="license">See the one-time unlock</button>`) : ''}
       </aside>
     </main>
     <footer>
@@ -262,7 +262,7 @@ function showFormError(message: string): void {
 
 function openBedForm(id?: string): void {
   const bed = data.beds.find((item) => item.id === id);
-  if (!bed && !unlocked && data.beds.length >= 3) { openLicenseDialog('The free notebook holds 3 beds. Unlock once to add as many as you need.'); return; }
+  if (!bed && PAID_UNLOCK_AVAILABLE && !unlocked && data.beds.length >= 3) { openLicenseDialog('The free notebook holds 3 beds. Unlock once to add as many as you need.'); return; }
   openDialog(dialogShell(bed ? 'Edit bed' : 'Add a bed', `
     <label>Bed name <input name="name" maxlength="60" required value="${escapeHtml(bed?.name || '')}" autocomplete="off"><small>For example, “Patio trough” or “North bed”.</small></label>
     <label>Bed note <textarea name="notes" maxlength="180" rows="3">${escapeHtml(bed?.notes || '')}</textarea><small>Optional: size, sun, or your own shorthand.</small></label>
@@ -302,7 +302,7 @@ function openPlantingForm(id?: string, bedId?: string): void {
 
 function openTemplateForm(id?: string): void {
   const template = data.templates.find((item) => item.id === id);
-  if (!template && !unlocked && data.templates.length >= 5) { openLicenseDialog('The free notebook holds 5 crop notes. Unlock once to keep an unlimited list.'); return; }
+  if (!template && PAID_UNLOCK_AVAILABLE && !unlocked && data.templates.length >= 5) { openLicenseDialog('The free notebook holds 5 crop notes. Unlock once to keep an unlimited list.'); return; }
   openDialog(dialogShell(template ? 'Edit crop note' : 'Add a crop note', `
     <label>Crop name <input name="name" maxlength="60" required value="${escapeHtml(template?.name || '')}" placeholder="e.g. Bush beans"></label>
     <label>Your duration <span class="number-field"><input name="duration" type="number" min="1" max="366" inputmode="numeric" required value="${template?.durationDays || 45}"><span>days</span></span><small>Use the time you want to allow. This app does not estimate it.</small></label>
@@ -401,9 +401,10 @@ async function importBackup(event: Event): Promise<void> {
 }
 
 function openLicenseDialog(message = ''): void {
+  const checkoutUrl = availableCheckoutUrl();
   const token = storedLicense();
   openDialog(`<div class="dialog-header"><div><p class="hand-note">one-time unlock</p><h2 id="dialog-title">${unlocked ? 'Manage your garden license' : 'Unlimited beds, one purchase'}</h2></div><button class="icon-button" type="button" data-dialog-close aria-label="Close dialog">${icon('close')}</button></div>
-    <div class="license-sheet">${message ? `<p class="limit-message">${escapeHtml(message)}</p>` : ''}<p>The free notebook is useful forever: 3 beds, 5 crop notes, unlimited entries, gap planning, offline use, and all exports.</p><ul><li>Unlimited beds</li><li>Unlimited successor crop notes</li><li>Use on another device by pasting your license</li></ul><p class="price"><strong>US$9</strong> once · no subscription</p><a class="button primary full" href="${CHECKOUT_URL}">${unlocked ? 'Open purchase page' : 'Buy the one-time unlock'}</a><p class="merchant-note">Checkout and refunds are handled by Sociobot / Dodo, the merchant of record.</p><hr><form id="license-form"><label>Have a license? Paste it here <input name="license" autocomplete="off" value="${escapeHtml(token)}" placeholder="License token"></label><div class="form-error" role="alert" hidden></div><div class="dialog-actions">${token ? '<button type="button" class="button quiet" id="remove-license">Remove from device</button>' : '<span></span>'}<button class="button secondary" type="submit">Verify and restore</button></div></form><p class="legal-line">By purchasing, you agree to the <a href="/terms/">terms</a>. See how verification works in <a href="/privacy/">privacy</a>.</p></div>`);
+    <div class="license-sheet">${message ? `<p class="limit-message">${escapeHtml(message)}</p>` : ''}<p>The free notebook is useful forever: 3 beds, 5 crop notes, unlimited entries, gap planning, offline use, and all exports.</p><ul><li>Unlimited beds</li><li>Unlimited successor crop notes</li><li>Use on another device by pasting your license</li></ul><p class="price"><strong>US$9</strong> once · no subscription</p>${checkoutUrl ? `<a class="button primary full" href="${checkoutUrl}">${unlocked ? 'Open purchase page' : 'Buy the one-time unlock'}</a>` : '<p class="limit-message">Purchases are not available yet. This notebook is currently unlimited.</p>'}<p class="merchant-note">Checkout and refunds are handled by Sociobot / Dodo, the merchant of record.</p><hr><form id="license-form"><label>Have a license? Paste it here <input name="license" autocomplete="off" value="${escapeHtml(token)}" placeholder="License token"></label><div class="form-error" role="alert" hidden></div><div class="dialog-actions">${token ? '<button type="button" class="button quiet" id="remove-license">Remove from device</button>' : '<span></span>'}<button class="button secondary" type="submit">Verify and restore</button></div></form><p class="legal-line">By purchasing, you agree to the <a href="/terms/">terms</a>. See how verification works in <a href="/privacy/">privacy</a>.</p></div>`);
   const dialog = getDialog();
   dialog.querySelector<HTMLFormElement>('#license-form')!.addEventListener('submit', async (event) => {
     event.preventDefault(); const form = event.currentTarget as HTMLFormElement; const value = String(new FormData(form).get('license')).trim();

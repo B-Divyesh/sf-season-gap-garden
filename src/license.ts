@@ -1,10 +1,18 @@
 export const PRODUCT_SLUG = 'season-gap-garden';
 export const CHECKOUT_URL = `https://api.sociobot.in/api/v1/products/${PRODUCT_SLUG}/checkout`;
+// The billing catalog is the source of truth for this switch. Keep the
+// checkout hidden until the factory has registered this exact product; a link
+// that ends in a 404 is worse than no purchase offer at all.
+export const PAID_UNLOCK_AVAILABLE = false;
 const LICENSE_KEY = `sb_license:${PRODUCT_SLUG}`;
 const VERDICT_KEY = `${LICENSE_KEY}:verdict`;
 const DAY = 86_400_000;
 
 interface Verdict { valid: boolean; checkedAt: number }
+
+export function availableCheckoutUrl(): string | null {
+  return PAID_UNLOCK_AVAILABLE ? CHECKOUT_URL : null;
+}
 
 export function captureLicense(): void {
   const url = new URL(location.href);

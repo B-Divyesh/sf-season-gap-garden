@@ -21,7 +21,7 @@ The exact production build command is:
 npm run build
 ```
 
-The static deploy output is `dist/`, with `dist/index.html` at its root. No environment variables are needed for the free app. The one-time paid unlock talks only to the Sociobot billing API; the factory registers the product separately.
+The static deploy output is `dist/`, with `dist/index.html` at its root. No environment variables are needed. The factory must register a product in the Sociobot billing catalog before a paid unlock can be offered; until then the notebook is unlimited and has no purchase link.
 
 ## Verify
 
@@ -36,8 +36,8 @@ Playwright is pinned to 1.58.2. In the factory image its Chromium browser is alr
 
 ## Product boundaries
 
-- Free: 3 beds, 5 successor notes, unlimited crop/rest entries, gap planning, offline use, CSV, and backup/restore.
-- One-time US$9 license: unlimited beds and successor notes. Checkout and refunds are handled by Sociobot / Dodo.
+- Current availability: unlimited beds, successor notes, crop/rest entries, gap planning, offline use, CSV, and backup/restore. No purchase is currently offered.
+- If the factory enables the planned one-time US$9 license, checkout and refunds will be handled by Sociobot / Dodo.
 - No accounts, trackers, weather feed, plant encyclopedia, companion-plant claims, pesticide guidance, or food-safety advice.
 
 See [the researched brief](.factory/brief.json), [visual thesis](.factory/design.md), and [handoff](.factory/handoff.md). The code is MIT licensed.
