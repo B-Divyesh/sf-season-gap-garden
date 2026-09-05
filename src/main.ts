@@ -1,7 +1,8 @@
 import './styles.css';
 import { addDays, daysBetween, findGaps, formatDate, monthTicks, percentAcross, plantingStart } from './date';
+import { sampleGardenData } from './demo';
 import { PAID_UNLOCK_AVAILABLE, availableCheckoutUrl, cachedUnlock, captureLicense, clearLicense, storeLicense, storedLicense, verifyLicense } from './license';
-import { downloadFile, loadData, saveData, toCsv, validateGardenData } from './storage';
+import { DEMO_STORAGE_NAMESPACE, clearData, downloadFile, loadData, saveData, toCsv, validateGardenData } from './storage';
 import type { CropTemplate, Gap, GardenData, Planting } from './types';
 
 let data: GardenData;
@@ -10,6 +11,9 @@ let licenseNotice = '';
 let lastTrigger: HTMLElement | null = null;
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
+const isDemo = location.pathname === '/demo' || location.pathname === '/demo/' || new URLSearchParams(location.search).get('demo') === '1';
+const storageNamespace = isDemo ? DEMO_STORAGE_NAMESPACE : undefined;
+const BUILD_ID = '2026.09.05';
 
 const icon = (name: 'plus' | 'bed' | 'gap' | 'seed' | 'data' | 'edit' | 'trash' | 'close' | 'lock') => {
   const paths = {
@@ -42,28 +46,30 @@ function render(): void {
 
   app.innerHTML = `
     <header class="topbar">
-      <a class="wordmark" href="#main"><span class="wordmark-mark" aria-hidden="true">SG</span><span>Season Gap Garden</span></a>
+      <a class="wordmark" href="/"><span class="wordmark-mark" aria-hidden="true">SG</span><span>Season Gap Garden</span></a>
       <nav aria-label="Garden notebook">
-        <a href="#beds">Beds</a><a href="#gaps">Gap view</a><a href="#templates">Crop notes</a><a href="#data">Data</a>
+        <a href="/demo">Demo</a><a href="#gaps">Gap view</a><a href="#data">Data</a><a href="/privacy/">Privacy</a>
       </nav>
-      ${PAID_UNLOCK_AVAILABLE ? `<button class="unlock-button ${unlocked ? 'is-unlocked' : ''}" data-action="license">${icon(unlocked ? 'seed' : 'lock')} ${unlocked ? 'Garden unlocked' : 'Unlock unlimited'}</button>` : '<p class="notebook-state">Unlimited local notebook</p>'}
+      ${PAID_UNLOCK_AVAILABLE ? `<button class="unlock-button ${unlocked ? 'is-unlocked' : ''}" data-action="license">${icon(unlocked ? 'seed' : 'lock')} ${unlocked ? 'Garden unlocked' : 'Unlock more beds'}</button>` : '<p class="notebook-state">Local notebook</p>'}
     </header>
+    ${isDemo ? renderDemoBanner() : ''}
     <div class="connection-banner" id="connection-banner" role="status" hidden>You’re offline. Your notebook still works and saves on this device.</div>
     <main id="main">
       <section class="hero" aria-labelledby="page-title">
         <div class="hero-copy">
-          <p class="eyebrow">Your season, between the rows</p>
-          <h1 id="page-title">Find the space for<br><em>what comes next.</em></h1>
-          <p class="hero-lede">Write down when each bed clears. See the open windows. Fill them with a crop from your own notes—or mark the bed as resting.</p>
+          <p class="eyebrow">Garden bed planner</p>
+          <h1 id="page-title">${isDemo ? 'Review sample bed windows' : 'Plan follow-on crops from your bed dates'}</h1>
+          <p class="hero-lede">${isDemo ? 'Three beds are filled with real-looking dates, crop notes, and open windows ready to review.' : 'For small-space food gardeners who want to see open bed windows and decide what to grow or rest next.'}</p>
           <div class="hero-actions">
-            <button class="button primary" data-action="add-bed">${icon('plus')} Add a bed</button>
-            <a class="button quiet" href="#gaps">Open the gap view</a>
+            ${isDemo
+              ? '<a class="button primary" href="#gaps">View sample gap view</a><p class="action-note">Choose a crop from the sample notes.</p>'
+              : `<a class="button primary" href="/demo">${icon('seed')} Try it with sample data</a><p class="action-note">See three filled beds and their open windows.</p><button class="button quiet" data-action="add-bed">${icon('plus')} Start a real garden</button>`}
           </div>
-          <p class="local-note"><span aria-hidden="true">●</span> Saved only on this device · works offline</p>
+          ${isDemo ? renderDemoPreview(gaps) : `<ul class="hero-facts" aria-label="Planner facts"><li>Private: saved in this browser.</li><li>Offline: works after your first visit.</li><li>Price: add beds without a purchase.</li></ul>`}
         </div>
         <figure class="hero-study">
-          <img src="/assets/garden-study.webp" width="900" height="600" alt="A field-notebook drawing showing a leafy raised bed, then cleared soil, then a new row of seedlings." fetchpriority="high" decoding="async">
-          <figcaption>Crop → clear → follow on. You supply the dates.</figcaption>
+          <img src="/assets/garden-study-20260905.webp" width="900" height="600" alt="A field-notebook drawing showing a leafy raised bed, then cleared soil, then a new row of seedlings." fetchpriority="high" decoding="async">
+          <figcaption>Crop, clear, then follow on. You supply the dates.</figcaption>
         </figure>
       </section>
 
@@ -78,6 +84,15 @@ function render(): void {
           <div title="Beds with a crop and a recorded follow-on crop or rest"><strong>${coverage}%</strong><span>followed on</span></div>
         </div>
         <button class="button text-button" data-action="season">Edit season dates</button>
+      </section>
+
+      <section class="how-section" aria-labelledby="how-heading">
+        <div class="section-heading"><div><p class="folio">how it works</p><h2 id="how-heading">How it works</h2><p>Use your own dates and crop durations. The planner does the calendar arithmetic.</p></div></div>
+        <ol class="steps-list">
+          <li><strong>Record a bed</strong><span>Name a real raised bed, trough, or container.</span></li>
+          <li><strong>Add dates</strong><span>Record the crop start and expected clear date.</span></li>
+          <li><strong>Plan the gap</strong><span>Choose a saved crop note or mark an intentional rest.</span></li>
+        </ol>
       </section>
 
       <section class="notebook-section" id="beds" aria-labelledby="beds-heading">
@@ -116,16 +131,25 @@ function render(): void {
         </div>
       </section>
 
+      <section class="notebook-section boundaries-section" aria-labelledby="boundaries-heading">
+        <div class="section-heading"><div><p class="folio">planner boundaries</p><h2 id="boundaries-heading">What this planner does not do</h2><p>It arranges the dates and durations you enter. It does not tell you what will grow in your garden.</p></div></div>
+        <div class="boundary-grid"><div><h3>No climate predictions</h3><p>Check local advice for weather, planting, pests, and food safety.</p></div><div><h3>No account required</h3><p>Your records stay in this browser unless you export a backup.</p></div><div><h3>No checkout today</h3><p>Add beds and use the planning tools without a purchase.</p></div></div>
+      </section>
+
+      <section class="notebook-section privacy-section" aria-labelledby="privacy-heading">
+        <div class="section-heading"><div><p class="folio">privacy and data</p><h2 id="privacy-heading">Privacy and data</h2><p>Export a CSV for the season or a JSON backup before changing devices or clearing browser data.</p></div><a class="button secondary" href="/privacy/">Read privacy details</a></div>
+      </section>
+
       <aside class="paid-note" aria-label="Notebook availability">
-        <div><p class="hand-note">your whole notebook</p><h2>${PAID_UNLOCK_AVAILABLE ? (unlocked ? 'Unlimited garden unlocked' : 'Keep a bigger notebook') : 'Keep every bed together'}</h2><p>${PAID_UNLOCK_AVAILABLE ? (unlocked ? 'This device can keep unlimited beds and crop notes.' : 'The free garden includes 3 beds and 5 crop notes. A one-time US$9 license removes both limits—no subscription.') : 'All beds, crop notes, entries, gap planning, and exports are available on this device. Purchases are not available until the factory enables this product’s checkout.'}</p>${licenseNotice ? `<p class="license-notice">${escapeHtml(licenseNotice)}</p>` : ''}</div>
+        <div><p class="hand-note">your whole notebook</p><h2>${PAID_UNLOCK_AVAILABLE ? (unlocked ? 'Unlimited garden unlocked' : 'Keep a bigger notebook') : 'Keep every bed together'}</h2><p>${PAID_UNLOCK_AVAILABLE ? (unlocked ? 'This device can keep unlimited beds and crop notes.' : 'The free garden includes 3 beds and 5 crop notes. A one-time US$9 license removes both limits—no subscription.') : 'Record beds, crop notes, and planting entries here. This release has no checkout.'}</p>${licenseNotice ? `<p class="license-notice">${escapeHtml(licenseNotice)}</p>` : ''}</div>
         ${PAID_UNLOCK_AVAILABLE ? (unlocked ? `<button class="button quiet-on-dark" data-action="license">Manage license</button>` : `<button class="button marigold" data-action="license">See the one-time unlock</button>`) : ''}
       </aside>
     </main>
     <footer>
       <p><span class="footer-mark">SG</span> Season Gap Garden</p>
-      <p>Private by default. No account, tracking, or garden claims.</p>
+      <p>Plan follow-on crops from your own bed dates.</p>
       <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
-      <p class="generated-disclosure">Header artwork was generated for this project with the factory image model.</p>
+      <p class="generated-disclosure">Built by Param Factory · Build ${BUILD_ID} · Header artwork was generated for this project.</p>
     </footer>
     <dialog id="editor-dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -134,6 +158,14 @@ function render(): void {
 
   bindEvents();
   updateConnection();
+}
+
+function renderDemoBanner(): string {
+  return `<aside class="demo-banner" aria-label="Demo controls"><p><strong>Demo — sample data, nothing is saved to your real garden.</strong><span>Reset the sample or leave it when you are ready.</span></p><div><button class="button small quiet" data-action="reset-demo">Reset demo</button><button class="button small primary" data-action="start-real">Start for real</button></div></aside>`;
+}
+
+function renderDemoPreview(gaps: Gap[]): string {
+  return `<dl class="demo-preview" aria-label="Sample garden results"><div><dt>${data.beds.length}</dt><dd>sample beds</dd></div><div><dt>${data.plantings.length}</dt><dd>dated entries</dd></div><div><dt>${gaps.length}</dt><dd>open windows</dd></div></dl>`;
 }
 
 function renderBeds(): string {
@@ -213,6 +245,8 @@ async function handleAction(event: Event): Promise<void> {
   if (action === 'export-json') exportJson();
   if (action === 'license') openLicenseDialog();
   if (action === 'reload') location.reload();
+  if (action === 'reset-demo') await resetDemo();
+  if (action === 'start-real') await startForReal();
 }
 
 function getDialog(): HTMLDialogElement {
@@ -376,7 +410,7 @@ async function deleteTemplate(id: string): Promise<void> {
 }
 
 async function persist(message: string): Promise<void> {
-  await saveData(data); closeDialog(); render(); showToast(message);
+  await saveData(data, storageNamespace); closeDialog(); render(); showToast(message);
 }
 
 function exportCsv(): void {
@@ -395,7 +429,7 @@ async function importBackup(event: Event): Promise<void> {
   try {
     const imported = validateGardenData(JSON.parse(await file.text()));
     if (!confirm(`Replace this notebook with “${file.name}”? It contains ${imported.beds.length} beds and ${imported.plantings.length} entries. Download a backup first if needed.`)) return;
-    data = imported; await saveData(data); render(); showToast('Backup restored.');
+    data = imported; await saveData(data, storageNamespace); render(); showToast('Backup restored.');
   } catch (error) { showToast(error instanceof Error ? error.message : 'This backup could not be read.', true); }
   finally { input.value = ''; }
 }
@@ -426,6 +460,19 @@ function updateConnection(): void {
   const banner = document.querySelector<HTMLElement>('#connection-banner'); if (banner) banner.hidden = navigator.onLine;
 }
 
+async function resetDemo(): Promise<void> {
+  if (!isDemo) return;
+  data = sampleGardenData();
+  await saveData(data, DEMO_STORAGE_NAMESPACE);
+  render();
+  showToast('Sample reset. Your real garden was not changed.');
+}
+
+async function startForReal(): Promise<void> {
+  if (isDemo) await clearData(DEMO_STORAGE_NAMESPACE);
+  location.assign('/');
+}
+
 async function reconcileLicense(): Promise<void> {
   if (!storedLicense()) return;
   try {
@@ -448,7 +495,8 @@ function registerServiceWorker(): void {
 
 async function init(): Promise<void> {
   captureLicense(); unlocked = cachedUnlock();
-  try { data = await loadData(); render(); registerServiceWorker(); void reconcileLicense(); }
+  if (isDemo) document.title = 'Demo — Season Gap Garden';
+  try { data = await loadData(storageNamespace, isDemo ? sampleGardenData() : undefined); render(); registerServiceWorker(); void reconcileLicense(); }
   catch {
     app.innerHTML = `<main id="main" class="fatal"><h1>Season Gap Garden</h1><h2>The notebook could not open</h2><p>Your browser blocked local storage. Allow site data for this page, then reload.</p><button class="button primary" onclick="location.reload()">Try again</button></main>`;
   }

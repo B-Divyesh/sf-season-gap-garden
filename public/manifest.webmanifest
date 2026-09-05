@@ -3,19 +3,19 @@
   "short_name": "Gap Garden",
   "description": "Spot open bed windows and plan what comes next from your own crop notes.",
   "id": "/?source=pwa",
-  "start_url": "/?v=1",
+  "start_url": "/?v=2",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F4EEDC",
   "theme_color": "#F4EEDC",
   "orientation": "any",
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/icons/icon-192-v1.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512-v1.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512-v1.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Open gap view", "short_name": "Gaps", "url": "/?v=1#gaps", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Add a bed", "short_name": "Add bed", "url": "/?v=1#beds", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+    { "name": "Open gap view", "short_name": "Gaps", "url": "/?v=2#gaps", "icons": [{ "src": "/icons/icon-192-v1.png", "sizes": "192x192" }] },
+    { "name": "Add a bed", "short_name": "Add bed", "url": "/?v=2#beds", "icons": [{ "src": "/icons/icon-192-v1.png", "sizes": "192x192" }] }
   ]
 }

@@ -1,7 +1,7 @@
-const VERSION = 'season-gap-v6';
+const VERSION = 'season-gap-v7';
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
-const SHELL = ['/offline.html', '/manifest.webmanifest', '/assets/garden-study.webp', '/fonts/atkinson-regular.woff2', '/fonts/atkinson-bold.woff2', '/fonts/caveat-variable.woff2', '/icons/icon.svg', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png'];
+const SHELL = ['/offline.html', '/demo/', '/manifest.webmanifest', '/assets/garden-study-20260905.webp', '/assets/garden-social-20260905.webp', '/fonts/atkinson-regular-v1.woff2', '/fonts/atkinson-bold-v1.woff2', '/fonts/caveat-variable-v1.woff2', '/icons/icon.svg', '/icons/icon-192-v1.png', '/icons/icon-512-v1.png', '/icons/icon-maskable-512-v1.png', '/legal-v1.css'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {

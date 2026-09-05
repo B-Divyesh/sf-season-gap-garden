@@ -1,12 +1,20 @@
 # Season Gap Garden
 
-Season Gap Garden is a private, offline crop-turnover notebook for small-space food gardeners. Record when each real bed is occupied, see the windows between crops, and fill a window from your own duration notes or mark it as intentional rest. It does date arithmetic, not agronomic or climate recommendations.
+Plan follow-on crops from your bed dates. It is for small-space food gardeners
+who want to see an open bed window and decide what comes next.
 
-The app is local-first: beds, plantings, crop notes, and settings live in IndexedDB. Users can export a season CSV or a complete JSON backup. It installs as a PWA and keeps working after the network disappears.
+Try the one-click sample at
+[season-gap-garden.sociobot.in/demo](https://season-gap-garden.sociobot.in/demo).
+The sample uses a separate browser store and never changes a real garden.
 
-Live: <https://season-gap-garden.sociobot.in>
+Season Gap Garden records beds and dated crop or rest entries. It shows open
+windows, lets you choose a follow-on crop from saved duration notes, and
+exports a season CSV or full JSON backup. Garden records stay in the browser.
+After the first online visit, the app works offline and can be installed as a
+PWA. It arranges dates that users enter; it does not give climate, pesticide,
+food-safety, or planting advice.
 
-## Develop
+## Run
 
 Requires Node.js 20 or newer.
 
@@ -15,29 +23,47 @@ npm ci
 npm run dev
 ```
 
-The exact production build command is:
-
-```sh
-npm run build
-```
-
-The static deploy output is `dist/`, with `dist/index.html` at its root. No environment variables are needed. The factory must register a product in the Sociobot billing catalog before a paid unlock can be offered; until then the notebook is unlimited and has no purchase link.
+The static production build is `dist/`, with `dist/index.html` at its root. No
+environment variables are needed.
 
 ## Verify
 
+From a clean checkout:
+
 ```sh
-npm test          # unit tests
-npm run build     # type-check and reproducible production bundle
-npm run test:e2e  # desktop + 390px flow, axe, and offline reload
-npm run check     # all of the above
+npm ci
+npm test
+npm run build
+npm run test:e2e  # desktop and mobile browser paths
+npm run test:claims  # every declared public claim in the demo sandbox
+npm run test:browser  # all browser paths and claims used by the full check
+npm run check
 ```
 
-Playwright is pinned to 1.58.2. In the factory image its Chromium browser is already installed at `$PLAYWRIGHT_BROWSERS_PATH`; elsewhere, run `npx playwright install chromium` once.
+Every visitor-facing claim is listed in `.factory/claims.json`. Run one claim
+by copying its documented command, or run the tagged Chromium claims together:
 
-## Product boundaries
+```sh
+npm run test:claims
+```
 
-- Current availability: unlimited beds, successor notes, crop/rest entries, gap planning, offline use, CSV, and backup/restore. No purchase is currently offered.
-- If the factory enables the planned one-time US$9 license, checkout and refunds will be handled by Sociobot / Dodo.
-- No accounts, trackers, weather feed, plant encyclopedia, companion-plant claims, pesticide guidance, or food-safety advice.
+Playwright is pinned to 1.58.2. In the factory image its Chromium browser is
+already installed at `$PLAYWRIGHT_BROWSERS_PATH`; elsewhere, run
+`npx playwright install chromium` once.
 
-See [the researched brief](.factory/brief.json), [visual thesis](.factory/design.md), and [handoff](.factory/handoff.md). The code is MIT licensed.
+## Data, privacy, and scope
+
+- Garden data is stored locally in IndexedDB. Export a CSV or JSON backup before
+  clearing browser data or moving to another device.
+- The sample is isolated in `demo:season-gap-garden`; real data uses
+  `season-gap-garden`. See `.factory/demo.md` for reset behavior.
+- The current release has no checkout. You can add beds without a purchase.
+- During normal planning, the app makes no request beyond this site. It has no
+  ads, analytics, tracking pixels, third-party fonts, or third-party runtime
+  scripts.
+- The tool uses only the dates and crop durations that the gardener enters. It
+  does not predict weather or recommend crops.
+
+See the [researched brief](.factory/brief.json), [visual thesis](.factory/design.md),
+[claims registry](.factory/claims.json), and [handoff](.factory/handoff.md).
+The code is MIT licensed.

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "demo-isolation",
+    "claim": "The sample uses a separate browser store and never changes a real garden.",
+    "where": "README, demo banner, .factory/demo.md",
+    "test": "npm run test:claims -- --grep @claim:demo-isolation",
+    "sandbox": "Fresh context creates a real-bed marker, enters the demo, mutates and resets it, then returns to the unchanged real marker."
+  },
+  {
+    "id": "open-windows",
+    "claim": "Bed dates show open windows.",
+    "where": "Landing first screen, gap view",
+    "test": "npm run test:claims -- --grep @claim:open-windows",
+    "sandbox": "Fresh browser context at /?demo=1; assert the seeded dated beds produce visible open-window cards."
+  },
+  {
+    "id": "follow-on-crop",
+    "claim": "Choose a follow-on crop from saved crop notes.",
+    "where": "How it works, gap planner dialog",
+    "test": "npm run test:claims -- --grep @claim:follow-on-crop",
+    "sandbox": "Fresh demo; choose Quick leaves from a saved duration note and assert a new planted entry appears."
+  },
+  {
+    "id": "local-data",
+    "claim": "Garden records stay in this browser.",
+    "where": "Landing facts, Privacy",
+    "test": "npm run test:claims -- --grep @claim:local-data",
+    "sandbox": "Fresh demo; save a bed, assert its IndexedDB namespace is demo:season-gap-garden, the real namespace is absent, and requests remain same-origin."
+  },
+  {
+    "id": "offline-reload",
+    "claim": "Works offline after the first visit.",
+    "where": "Landing facts, README, Privacy",
+    "test": "npm run test:claims -- --grep @claim:offline-reload",
+    "sandbox": "Dedicated fresh browser context visits /?demo=1 online, waits for the service worker, then reloads offline and sees the sample garden."
+  },
+  {
+    "id": "csv-export",
+    "claim": "Exports a season CSV with bed, entry type, crop or rest, dates, and notes.",
+    "where": "Data section, README",
+    "test": "npm run test:claims -- --grep @claim:csv-export",
+    "sandbox": "Fresh demo download; assert the CSV header and its six rows: one header plus one row for each seeded entry."
+  },
+  {
+    "id": "json-restore",
+    "claim": "Restores a complete JSON backup.",
+    "where": "Data section, Privacy",
+    "test": "npm run test:claims -- --grep @claim:json-restore",
+    "sandbox": "Fresh demo downloads a backup, adds a bed, restores that backup, and confirms the sample returns without the extra bed."
+  },
+  {
+    "id": "validated-restore",
+    "claim": "Validates a backup before replacing local data.",
+    "where": "Data section",
+    "test": "npm run test:claims -- --grep @claim:validated-restore",
+    "sandbox": "Fresh demo uploads a malformed nested record; assert no confirmation appears, an error is shown, and the sample survives reload."
+  },
+  {
+    "id": "pwa-install",
+    "claim": "The planner is installable as a PWA.",
+    "where": "Privacy, README",
+    "test": "npm run test:claims -- --grep @claim:pwa-install",
+    "sandbox": "Fresh demo checks an active service worker and a standalone manifest with 192px and 512px icons."
+  },
+  {
+    "id": "no-tracking",
+    "claim": "The demo makes no request beyond this site while you plan.",
+    "where": "Privacy",
+    "test": "npm run test:claims -- --grep @claim:no-tracking",
+    "sandbox": "Fresh demo records every request while loading and exporting; only the product origin is allowed."
+  },
+  {
+    "id": "no-purchase",
+    "claim": "Add beds without a purchase.",
+    "where": "Landing facts, Terms",
+    "test": "npm run test:claims -- --grep @claim:no-purchase",
+    "sandbox": "Fresh demo adds four beds beyond the former free limit and asserts no checkout link or purchase step appears."
+  }
+]

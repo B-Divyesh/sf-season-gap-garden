@@ -57,6 +57,9 @@ Prompt sheet:
 
 - Generated with the factory Azure image deployment (`factory-image`) on 2026-08-27. Original generated work; no third-party source material.
 - Source PNG and prompt sidecar live in `assets/src/`. Production WebP is resized and optimized to remain under 300 KB.
+- `garden-social-20260905.webp` is a 1200×630 crop derived from that same
+  generated study with ImageMagick on 2026-09-05. It is used only for social
+  metadata, keeps the original no-text artwork, and is not a separate source.
 - Icons and patterns elsewhere are authored in CSS or inline SVG and are original to this repository.
 
 ## Why this fits

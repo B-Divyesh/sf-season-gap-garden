@@ -5,6 +5,13 @@ const STORE_NAME = 'garden';
 const DATA_KEY = 'current';
 const LAST_GOOD_KEY = 'last-known-good';
 
+/**
+ * Demo data deliberately lives in a different IndexedDB database.  Keeping
+ * the namespace here, next to the storage boundary, makes it impossible for
+ * the UI to accidentally save a sample action into a gardener's notebook.
+ */
+export const DEMO_STORAGE_NAMESPACE = 'demo:season-gap-garden';
+
 export function defaultData(now = new Date()): GardenData {
   const year = now.getFullYear();
   const stamp = now.toISOString();
@@ -21,9 +28,9 @@ export function defaultData(now = new Date()): GardenData {
   };
 }
 
-function openDb(): Promise<IDBDatabase> {
+function openDb(name = DB_NAME): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    const request = indexedDB.open(name, 1);
     request.onerror = () => reject(request.error);
     request.onupgradeneeded = () => {
       request.result.createObjectStore(STORE_NAME);
@@ -32,53 +39,70 @@ function openDb(): Promise<IDBDatabase> {
   });
 }
 
-export async function loadData(): Promise<GardenData> {
-  const db = await openDb();
-  const current = await readRecord(db, DATA_KEY);
-  if (!current) return defaultData();
-
+export async function loadData(namespace = DB_NAME, initialData?: GardenData): Promise<GardenData> {
+  const db = await openDb(namespace);
   try {
-    return validateGardenData(current);
-  } catch (currentError) {
-    // A save made by this version always retains the prior valid notebook.
-    // Prefer it to leaving the application unusable if storage is interrupted
-    // or an older version somehow wrote invalid data.
-    const lastKnownGood = await readRecord(db, LAST_GOOD_KEY);
-    if (lastKnownGood) {
-      try {
-        const recovered = validateGardenData(lastKnownGood);
-        await writeCurrent(db, recovered);
-        return recovered;
-      } catch {
-        // Keep the original error below; neither stored record is trustworthy.
+    const current = await readRecord(db, DATA_KEY);
+    if (!current) return initialData ? structuredClone(initialData) : defaultData();
+
+    try {
+      return validateGardenData(current);
+    } catch (currentError) {
+      // A save made by this version always retains the prior valid notebook.
+      // Prefer it to leaving the application unusable if storage is interrupted
+      // or an older version somehow wrote invalid data.
+      const lastKnownGood = await readRecord(db, LAST_GOOD_KEY);
+      if (lastKnownGood) {
+        try {
+          const recovered = validateGardenData(lastKnownGood);
+          await writeCurrent(db, recovered);
+          return recovered;
+        } catch {
+          // Keep the original error below; neither stored record is trustworthy.
+        }
       }
+      throw currentError;
     }
-    throw currentError;
+  } finally {
+    db.close();
   }
 }
 
-export async function saveData(data: GardenData): Promise<void> {
+export async function saveData(data: GardenData, namespace = DB_NAME): Promise<void> {
   const updatedAt = new Date().toISOString();
   const candidate = { ...data, updatedAt };
   validateGardenData(candidate);
-  const db = await openDb();
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const current = store.get(DATA_KEY);
-    current.onerror = () => reject(current.error);
-    current.onsuccess = () => {
-      // Snapshot only a complete, valid notebook. An invalid record must never
-      // displace a known-good recovery point.
-      if (current.result) {
-        try { store.put(validateGardenData(current.result), LAST_GOOD_KEY); } catch { /* do not snapshot invalid data */ }
-      }
-      store.put(candidate, DATA_KEY);
-    };
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  const db = await openDb(namespace);
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const current = store.get(DATA_KEY);
+      current.onerror = () => reject(current.error);
+      current.onsuccess = () => {
+        // Snapshot only a complete, valid notebook. An invalid record must never
+        // displace a known-good recovery point.
+        if (current.result) {
+          try { store.put(validateGardenData(current.result), LAST_GOOD_KEY); } catch { /* do not snapshot invalid data */ }
+        }
+        store.put(candidate, DATA_KEY);
+      };
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
   data.updatedAt = updatedAt;
+}
+
+export function clearData(namespace: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(namespace);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => reject(new Error('The demo storage could not be cleared. Close other demo tabs and try again.'));
+  });
 }
 
 export function validateGardenData(value: unknown): GardenData {
