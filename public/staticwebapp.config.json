@@ -17,7 +17,7 @@
       "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
     },
     {
-      "route": "/legal-v1.css",
+      "route": "/legal-v2.css",
       "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
     }
   ],

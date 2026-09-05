@@ -80,9 +80,11 @@ test('legal pages are available as static offline-friendly routes', async ({ pag
   await page.goto('/privacy/');
   await expect(page).toHaveTitle('Privacy — Season Gap Garden');
   await expect(page.getByRole('heading', { name: 'Privacy' })).toBeVisible();
+  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''))).toEqual([]);
   await page.goto('/terms/');
   await expect(page).toHaveTitle('Terms — Season Gap Garden');
   await expect(page.getByRole('heading', { name: 'Terms of use' })).toBeVisible();
+  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''))).toEqual([]);
 });
 
 test('does not advertise a checkout that the billing catalog has not enabled', async ({ page }) => {
@@ -192,6 +194,17 @@ test('keeps named mobile links at least 44 pixels high', async ({ page }) => {
   }
   await page.goto('/privacy/');
   expect(await page.getByRole('link', { name: 'Season Gap Garden' }).evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+
+  for (const [route, email] of [
+    ['/privacy/', 'privacy@sociobot.in'],
+    ['/terms/', 'support@sociobot.in'],
+  ]) {
+    await page.goto(route);
+    const box = await page.getByRole('link', { name: email }).boundingBox();
+    expect(box, `${email} needs a measurable touch target`).not.toBeNull();
+    expect(box!.width).toBeGreaterThanOrEqual(44);
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+  }
 });
 
 test('puts the job, audience, and sample action in the first phone screen', async ({ page }) => {
