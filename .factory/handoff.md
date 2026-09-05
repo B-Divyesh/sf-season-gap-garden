@@ -3,7 +3,8 @@
 ## Release
 
 - **Implementation SHA:** `846153e152da8d352fde49b9b40e2ef10b8b57a3`
-- **Documentation SHA:** recorded by the following handoff-only commit.
+- **Documentation evidence SHA:** `83f42785d0b7a445ab4f2aec86ce35ade2671c2a`
+  (the release-evidence commit; this follow-up only records that SHA).
 - **Deployment:** Azure Static Web Apps deployment
   `50a74cb5-6cb5-4c29-b473-f27fda1faeb5` succeeded on 2026-09-05.
 - **Live URL:** <https://season-gap-garden.sociobot.in>
@@ -107,4 +108,3 @@ There are no known product defects or unmet findings. The product still has no
 billing checkout because the factory has not registered the product in the
 Sociobot billing catalog. The UI makes no purchase offer, so this is an
 external dependency rather than a customer-facing failure.
-
