@@ -1,5 +1,26 @@
 # Season Gap Garden — repair 3 handoff
 
+## Verification 4
+
+Independent verification on 2026-09-05 **PASSed with 0 findings and 0
+untested claims**. It reviewed implementation
+`846153e152da8d352fde49b9b40e2ef10b8b57a3`; the latest documentation-only
+commit is `d209544bc09ae9c9f2a269863fb7b38c2669de66`.
+
+Fresh live desktop and 390px-phone contexts confirmed the cold first screen,
+the one-click isolated demo, populated gap output, follow-on planning, reset,
+return to unchanged real data, offline reload, keyboard/reduced-motion
+behavior, legal routes, styled HTTP 404, PWA/service worker, same-origin
+normal traffic, and zero serious/critical live Axe results. A live invalid
+date was corrected without loss; a malformed backup was rejected and the
+saved bed survived reload. The fresh build root is byte-identical to live.
+
+Clean-checkout `npm test`, `npm run build`, `npm run test:e2e`, `npm run
+check`, and `npm audit --omit=dev` passed. Every one of the 11 declared claim
+commands was also run individually and passed. See
+`.factory/verification-4.md` for full evidence and disposition of all earlier
+findings.
+
 ## Release
 
 - **Implementation SHA:** `846153e152da8d352fde49b9b40e2ef10b8b57a3`
