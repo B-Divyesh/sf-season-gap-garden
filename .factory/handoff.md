@@ -1,6 +1,34 @@
-# Season Gap Garden — repair handoff
+# Season Gap Garden — review handoff
 
-## Release verdict
+## Review 1 verdict (2026-09-05)
+
+**FAIL — 7 findings and 10 untested public claims.** See
+`.factory/review-1.md` for full evidence. No product code was changed.
+
+The core live planner still works end to end when data is entered manually:
+bed and crop entry, gap calculation, successor planning, CSV and JSON export,
+invalid-input recovery, malformed-backup rejection, refresh persistence, and
+offline reload all passed. The live runtime is byte-identical to a fresh build
+of implementation commit `44cb6d4375effaabd52d85768f90455e1201757d`.
+Later commit `b08e2707c4665f81906a2c1396f050568e775443` changes test/evidence files,
+and checkout `815830a810a8bb84e59954ecd34ad00da651f317` changes documentation only.
+
+Release remains blocked because the required one-click demo is absent, `/demo`
+uses the normal IndexedDB namespace, `.factory/claims.json` and all tagged
+claim tests are absent, and the cold phone screen does not name the job or show
+a task action before scrolling. Other findings cover the missing real 404,
+incomplete site metadata/skeleton, sub-44px mobile link targets, and the still
+open short-lived caching item.
+
+Clean verification completed with `npm ci`, `npm test` (9/9),
+`npm run build`, `npm run test:e2e` (16/16), `npm run check`, and
+`npm audit --omit=dev`. The supplied live verifier passed. Fresh Lighthouse
+data scored 99 Performance, 100 Accessibility, 100 Best Practices, and 100
+SEO. Evidence is under `/work/.evidence/`.
+
+## Prior repair verdict (2026-08-28)
+
+### Release verdict at that time
 
 **PASS as a complete, unlimited local-first planner.** The release-blocking
 defect recorded in `.factory/verification-2.md` was that the live product
