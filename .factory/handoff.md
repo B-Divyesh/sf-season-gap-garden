@@ -1,131 +1,64 @@
-# Season Gap Garden — repair 3 handoff
+# Season Gap Garden — review 2 handoff
 
-## Verification 4
+## Current result
 
-Independent verification on 2026-09-05 **PASSed with 0 findings and 0
-untested claims**. It reviewed implementation
-`846153e152da8d352fde49b9b40e2ef10b8b57a3`; the latest documentation-only
-commit is `d209544bc09ae9c9f2a269863fb7b38c2669de66`.
+Strict review 2 on 2026-09-05 **FAILed with 1 Medium finding and 0 untested
+public claims**. No product code changed.
 
-Fresh live desktop and 390px-phone contexts confirmed the cold first screen,
-the one-click isolated demo, populated gap output, follow-on planning, reset,
-return to unchanged real data, offline reload, keyboard/reduced-motion
-behavior, legal routes, styled HTTP 404, PWA/service worker, same-origin
-normal traffic, and zero serious/critical live Axe results. A live invalid
-date was corrected without loss; a malformed backup was rejected and the
-saved bed survived reload. The fresh build root is byte-identical to live.
-
-Clean-checkout `npm test`, `npm run build`, `npm run test:e2e`, `npm run
-check`, and `npm audit --omit=dev` passed. Every one of the 11 declared claim
-commands was also run individually and passed. See
-`.factory/verification-4.md` for full evidence and disposition of all earlier
-findings.
-
-## Release
-
-- **Implementation SHA:** `846153e152da8d352fde49b9b40e2ef10b8b57a3`
-- **Documentation evidence SHA:** `83f42785d0b7a445ab4f2aec86ce35ade2671c2a`
-  (the release-evidence commit; this follow-up only records that SHA).
-- **Deployment:** Azure Static Web Apps deployment
-  `50a74cb5-6cb5-4c29-b473-f27fda1faeb5` succeeded on 2026-09-05.
+- **Implementation reviewed:** `846153e152da8d352fde49b9b40e2ef10b8b57a3`
+- **Documentation reviewed:** `38d2da83e75bd48088793c1d18499f13df4e4930`
 - **Live URL:** <https://season-gap-garden.sociobot.in>
-- **Live parity:** `dist/index.html` and the live root have SHA-256
-  `6ed61ff4b7c1d256b8f4b671e237233898fce049cf107b3748bbfcbd1b8ccde5`.
+- **Full report:** `.factory/review-2.md`
 
-## What changed
+The live root and a fresh candidate build are byte-identical at SHA-256
+`6ed61ff4b7c1d256b8f4b671e237233898fce049cf107b3748bbfcbd1b8ccde5`.
+Commits after the implementation candidate and before this review changed only
+documentation and verification records.
 
-This repair resolves all seven findings in `.factory/review-1.md`.
+## What was verified
 
-1. **Isolated sample demo:** `/demo` and `/?demo=1` open a populated three-bed
-   sample. Demo state is in `demo:season-gap-garden`, never reads or writes the
-   real `season-gap-garden` database, and has a persistent label, **Reset demo**,
-   and **Start for real**.
-2. **Claims:** `.factory/claims.json` now lists 11 visitor-facing claims. Each
-   has exactly one `@claim:<id>` Playwright outcome test. Tests use the shipped
-   demo sample; the privacy tests record outgoing requests and the offline test
-   owns a dedicated browser context.
-3. **First screen:** the root now names the job, audience, and first action in
-   plain language. On a 390px phone, **Try it with sample data** is at CSS y=323
-   with a 47px height, before any scroll. Three short privacy/offline/price facts
-   appear before the illustration.
-4. **Site structure:** added the three-step **How it works** section, product
-   boundaries, privacy/data section, consistent headers and footers, route
-   titles, canonical/OG/Twitter metadata, Apple touch icon, sitemap entries,
-   social preview image, and a product-styled `404.html`.
-5. **Accessibility:** root, footer, legal-header, and legal-footer links now
-   have 44px minimum targets. Existing labels, focus treatment, skip link,
-   dialog focus return, reduced motion, and semantic landmarks remain intact.
-6. **Caching:** versioned fonts, icons, artwork, and legal stylesheet have
-   immutable one-year headers. Documents and `sw.js` remain revalidated. The
-   service worker is now `season-gap-v7` and precaches the updated demo shell.
-7. **Copy and docs:** added the required copy audit, demo documentation, claims
-   registry, catalog description, and a refreshed README. The catalog text is
-   also copied to `/work/.evidence/catalog-description.txt`.
+Fresh desktop and 390px phone contexts confirmed the direct job, audience,
+three plain facts, and first sample action before scrolling. The one-click
+sample showed 3 beds, 5 dated entries, and 7 open windows. Planning **Quick
+leaves**, sample reset, demo namespace removal, and return to unchanged real
+data all passed.
 
-The earlier malformed-backup protection, recovery snapshot, disabled unavailable
-checkout, no-third-party normal load, and local-first IndexedDB planner are
-preserved. No AI or backend feature was added because the brief needs neither.
+Normal entry, equal-date validation, season-boundary validation, malformed
+backup rejection, and post-reload recovery passed live. Keyboard focus,
+reduced motion, Axe, legal routes, styled HTTP 404, internal
+links, same-origin privacy behavior, service-worker control, offline reload,
+headers, PWA metadata, and immutable versioned assets also passed. The supplied
+URL verifier reported no console or page errors.
 
-## Run and verify
+One earlier mobile-target defect remains partly open. At 390px, the inline
+email links on Privacy and Terms are each 20 CSS pixels high, below the required
+44px touch target. Root, header, footer, and 404 links pass. The product needs a
+small legal-page CSS repair and a browser assertion for both email links before
+it can pass strict review.
 
-From a clean checkout with Node 20+:
+Fresh mobile Lighthouse results: Performance 99, Accessibility 100, Best
+Practices 100, SEO 100; FCP 1.50s, LCP 1.65s, TBT 0ms, CLS 0.039.
+
+## Clean verification
+
+From a separate clean clone with Node 22 and the documented `npm ci` setup:
 
 ```sh
 npm ci
 npm test
 npm run build
 npm run test:e2e
-npm run test:claims
 npm run check
 npm audit --omit=dev
 ```
 
-`npm run check` passed: 9 Vitest tests, TypeScript/Vite build, and 22 Chromium
-browser tests. Those browser tests include every 11 tagged public claim, normal
-and invalid/recovery paths, 390px layout, keyboard and reduced-motion behavior,
-service-worker offline reload, legal routes, the demo sandbox, and 404 design.
-All 11 individual commands in `.factory/claims.json` were also run separately
-and passed from this clean setup.
+All passed: 9 unit tests, 11 non-claim browser tests, 22 total browser tests,
+and 0 package vulnerabilities. Every one of the 11 commands declared in
+`.factory/claims.json` was also run separately and passed.
 
-Build output exists at `dist/index.html`: 63,075 bytes raw and 18,481 bytes
-when gzipped. `npm audit --omit=dev` reported 0 vulnerabilities.
+## Remaining work
 
-## Live verification
-
-- The supplied `verify-url.sh` passed against the HTTPS root: HTTP 200, 833ms
-  load, no console/page errors, title/lang, one h1, main landmark, image alt
-  text, and labelled buttons.
-- Fresh desktop and phone Chromium contexts passed. The desktop first screen
-  shows the job and sample action; the phone has no horizontal overflow
-  (`390 === scrollWidth === clientWidth`) and the sample action is visible
-  before scrolling.
-- The live demo shows the persistent demo label, 3 populated beds, 7 open
-  windows, reset control, and start-real control. Normal-load traffic stayed on
-  `https://season-gap-garden.sociobot.in`; live desktop and phone had no console
-  or page errors.
-- Live AxeBuilder WCAG 2 A/AA found zero serious or critical violations. The
-  standalone `@axe-core/cli` could not launch Selenium against the image's
-  bundled Chrome, so the repository's Playwright Axe integration is the
-  authoritative Axe run for this worker.
-- A fresh live service-worker reload is controlled by `/sw.js`. The tagged
-  offline claim verifies the demo after going offline in its own context.
-- `/does-not-exist-repair-3` returns the expected HTTP 404 and the styled
-  **Page not found** page. Root, demo, query demo, legal pages, 404 page,
-  robots, sitemap, and manifest returned their expected statuses.
-- Live response headers include CSP with `frame-ancestors 'none'`,
-  `X-Frame-Options: DENY`, HSTS, nosniff, permissions policy, and strict-origin
-  referrer policy. The versioned hero image returned
-  `Cache-Control: public, max-age=31536000, immutable`.
-- Lighthouse mobile output was written to
-  `/work/.evidence/season-gap-garden-repair-3-live/lighthouse.json`: Performance
-  99, Accessibility 100, Best Practices 100, SEO 100; FCP 1.5s, LCP 2.0s,
-  TBT 0ms, CLS 0.039. Lighthouse completed the audit data but its final
-  full-page screenshot step crashed the tab; the JSON category and metric
-  values were written before that tool-side crash.
-
-## Remaining items
-
-There are no known product defects or unmet findings. The product still has no
-billing checkout because the factory has not registered the product in the
-Sociobot billing catalog. The UI makes no purchase offer, so this is an
-external dependency rather than a customer-facing failure.
+One Medium product defect remains: make the Privacy and Terms email targets at
+least 44px high on phone and cover both with a 390px test. No public claim is
+untested. This static PWA has no backend or checkout, so tenant, restart,
+health, 429, and purchase-return checks do not apply.
