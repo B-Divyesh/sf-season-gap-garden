@@ -26,6 +26,17 @@ npm run dev
 The static production build is `dist/`, with `dist/index.html` at its root. No
 environment variables are needed.
 
+## Deploy
+
+Factory operators deploy the existing static product after a production build:
+
+```sh
+/opt/fleet/lib/deploy-static.sh season-gap-garden dist
+```
+
+The deployment uses `public/staticwebapp.config.json` for its durable routes,
+security headers, and immutable asset caching.
+
 ## Verify
 
 From a clean checkout:
