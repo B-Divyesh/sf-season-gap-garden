@@ -1,161 +1,110 @@
-# Season Gap Garden — review handoff
+# Season Gap Garden — repair 3 handoff
 
-## Review 1 verdict (2026-09-05)
+## Release
 
-**FAIL — 7 findings and 10 untested public claims.** See
-`.factory/review-1.md` for full evidence. No product code was changed.
-
-The core live planner still works end to end when data is entered manually:
-bed and crop entry, gap calculation, successor planning, CSV and JSON export,
-invalid-input recovery, malformed-backup rejection, refresh persistence, and
-offline reload all passed. The live runtime is byte-identical to a fresh build
-of implementation commit `44cb6d4375effaabd52d85768f90455e1201757d`.
-Later commit `b08e2707c4665f81906a2c1396f050568e775443` changes test/evidence files,
-and checkout `815830a810a8bb84e59954ecd34ad00da651f317` changes documentation only.
-
-Release remains blocked because the required one-click demo is absent, `/demo`
-uses the normal IndexedDB namespace, `.factory/claims.json` and all tagged
-claim tests are absent, and the cold phone screen does not name the job or show
-a task action before scrolling. Other findings cover the missing real 404,
-incomplete site metadata/skeleton, sub-44px mobile link targets, and the still
-open short-lived caching item.
-
-Clean verification completed with `npm ci`, `npm test` (9/9),
-`npm run build`, `npm run test:e2e` (16/16), `npm run check`, and
-`npm audit --omit=dev`. The supplied live verifier passed. Fresh Lighthouse
-data scored 99 Performance, 100 Accessibility, 100 Best Practices, and 100
-SEO. Evidence is under `/work/.evidence/`.
-
-## Prior repair verdict (2026-08-28)
-
-### Release verdict at that time
-
-**PASS as a complete, unlimited local-first planner.** The release-blocking
-defect recorded in `.factory/verification-2.md` was that the live product
-advertised a US$9 checkout whose exact Sociobot billing endpoint returned 404.
-Repository policy does not permit this product repository to register or alter
-the billing catalog. The repair therefore makes the shipped product honest:
-there is no purchase link, no US$9 claim in the app or legal pages, and no
-artificial 3-bed / 5-note limit while checkout is unavailable. The core
-researched job—recording beds, finding gaps, planning follow-ons, exporting,
-restoring, and working offline—remains intact and is now available without a
-dead-end payment flow.
-
-The planned one-time license code remains in place for a future registered
-product: `PAID_UNLOCK_AVAILABLE` is deliberately `false` until the factory
-registers `season-gap-garden` in the Sociobot billing catalog and verifies a
-real hosted checkout and return. License-return capture and URL cleanup remain
-covered by browser regression testing.
+- **Implementation SHA:** `846153e152da8d352fde49b9b40e2ef10b8b57a3`
+- **Documentation SHA:** recorded by the following handoff-only commit.
+- **Deployment:** Azure Static Web Apps deployment
+  `50a74cb5-6cb5-4c29-b473-f27fda1faeb5` succeeded on 2026-09-05.
+- **Live URL:** <https://season-gap-garden.sociobot.in>
+- **Live parity:** `dist/index.html` and the live root have SHA-256
+  `6ed61ff4b7c1d256b8f4b671e237233898fce049cf107b3748bbfcbd1b8ccde5`.
 
 ## What changed
 
-- Added a single explicit paid-availability gate in `src/license.ts`. When the
-  catalog is unavailable it returns no checkout URL, hides all purchase
-  affordances, and removes paid limits; a 404 cannot be offered to a user.
-- Kept `?license=` localStorage capture, URL cleanup, background verification,
-  and restore behavior for the eventual registered product.
-- Added exact regression coverage: unit coverage proves an unavailable product
-  has no checkout URL; desktop and 390px Playwright cover no checkout anchor,
-  local-only startup traffic, a fourth bed succeeding without a false limit,
-  and returned-license URL cleanup.
-- Updated README, privacy, and terms to describe the actual unlimited,
-  no-purchase release rather than a nonfunctional US$9 product.
-- Bumped the service-worker cache to `season-gap-v6` for a clean repaired-shell
-  update for installed users.
-- Added `public/staticwebapp.config.json`, deployed as the Static Web Apps
-  configuration: CSP, Permissions-Policy, `X-Frame-Options: DENY`,
-  `X-Content-Type-Options: nosniff`, and strict-origin referrer policy.
+This repair resolves all seven findings in `.factory/review-1.md`.
 
-The researched brief, notebook visual system, PWA/static artifact class,
-IndexedDB local-first storage, CSV/JSON ownership controls, offline behavior,
-and original generated artwork are unchanged.
+1. **Isolated sample demo:** `/demo` and `/?demo=1` open a populated three-bed
+   sample. Demo state is in `demo:season-gap-garden`, never reads or writes the
+   real `season-gap-garden` database, and has a persistent label, **Reset demo**,
+   and **Start for real**.
+2. **Claims:** `.factory/claims.json` now lists 11 visitor-facing claims. Each
+   has exactly one `@claim:<id>` Playwright outcome test. Tests use the shipped
+   demo sample; the privacy tests record outgoing requests and the offline test
+   owns a dedicated browser context.
+3. **First screen:** the root now names the job, audience, and first action in
+   plain language. On a 390px phone, **Try it with sample data** is at CSS y=323
+   with a 47px height, before any scroll. Three short privacy/offline/price facts
+   appear before the illustration.
+4. **Site structure:** added the three-step **How it works** section, product
+   boundaries, privacy/data section, consistent headers and footers, route
+   titles, canonical/OG/Twitter metadata, Apple touch icon, sitemap entries,
+   social preview image, and a product-styled `404.html`.
+5. **Accessibility:** root, footer, legal-header, and legal-footer links now
+   have 44px minimum targets. Existing labels, focus treatment, skip link,
+   dialog focus return, reduced motion, and semantic landmarks remain intact.
+6. **Caching:** versioned fonts, icons, artwork, and legal stylesheet have
+   immutable one-year headers. Documents and `sw.js` remain revalidated. The
+   service worker is now `season-gap-v7` and precaches the updated demo shell.
+7. **Copy and docs:** added the required copy audit, demo documentation, claims
+   registry, catalog description, and a refreshed README. The catalog text is
+   also copied to `/work/.evidence/catalog-description.txt`.
 
-## Verification
+The earlier malformed-backup protection, recovery snapshot, disabled unavailable
+checkout, no-third-party normal load, and local-first IndexedDB planner are
+preserved. No AI or backend feature was added because the brief needs neither.
 
-Run from a clean clone:
+## Run and verify
+
+From a clean checkout with Node 20+:
 
 ```sh
 npm ci
+npm test
+npm run build
+npm run test:e2e
+npm run test:claims
 npm run check
 npm audit --omit=dev
 ```
 
-Exact local evidence on 2026-08-28:
+`npm run check` passed: 9 Vitest tests, TypeScript/Vite build, and 22 Chromium
+browser tests. Those browser tests include every 11 tagged public claim, normal
+and invalid/recovery paths, 390px layout, keyboard and reduced-motion behavior,
+service-worker offline reload, legal routes, the demo sandbox, and 404 design.
+All 11 individual commands in `.factory/claims.json` were also run separately
+and passed from this clean setup.
 
-- `npm ci`: 66 packages installed; `npm audit --omit=dev`: 0 vulnerabilities.
-- `npm run check`: passed 9/9 Vitest tests, type-check, production build, and
-  16/16 Playwright tests. Browser tests run in Chromium desktop and iPhone-13
-  390×844 projects and cover normal planning, invalid-backup recovery,
-  keyboard Escape/focus return, legal routes, reduced-motion/axe baseline,
-  offline saved-data reload, checkout suppression, unlimited beds, and
-  returned-license cleanup.
-- Build output: `dist/index.html` exists at the required root, is 53,152 bytes
-  raw / 16,228 bytes gzip, and `dist/staticwebapp.config.json` is present.
-- Local browser regression checks record no checkout anchor or normal-load
-  third-party request while the catalog gate is off.
+Build output exists at `dist/index.html`: 63,075 bytes raw and 18,481 bytes
+when gzipped. `npm audit --omit=dev` reported 0 vulnerabilities.
 
-Live evidence after deployment:
+## Live verification
 
-- Repair commit `44cb6d4375effaabd52d85768f90455e1201757d` was pushed to
-  `main`.
-- Deployed with `/opt/fleet/lib/deploy-static.sh season-gap-garden dist`.
-  Azure Static Web Apps deployment `ac4acd6c-7453-4300-8108-7aefd7866c3a`
-  succeeded at `https://season-gap-garden.sociobot.in/`.
-- Live HTML is byte-identical to `dist/index.html`:
-  SHA-256 `eef6b7574ede3b8c41622f94ab7bca62b6b71919d75dbbb636efa6544da82e86`.
-- The supplied URL verifier passed: HTTP 200; 693 ms load; zero console/page
-  errors; title and `lang=en`; one `h1`; main landmark; zero missing image
-  alts and unlabeled buttons.
-- Fresh live desktop (1440px) and mobile (390×844) Chromium checks found zero
-  console/page errors, only `https://season-gap-garden.sociobot.in` on a
-  normal load, zero serious/critical axe WCAG 2 A/AA violations, no checkout
-  anchor, and an active `/sw.js` controller. At 390px,
-  `scrollWidth === clientWidth === 390`. After `context.setOffline(true)`,
-  both profiles reloaded the saved app and showed the offline banner.
-- The live response now includes HSTS, CSP with `frame-ancestors 'none'`,
-  Permissions-Policy, `X-Frame-Options: DENY`, strict-origin Referrer-Policy,
-  and `X-Content-Type-Options: nosniff`.
-- Live mobile Lighthouse 13.4.1 JSON results: Performance 99, Accessibility
-  100, Best Practices 100, SEO 100; FCP 1.4 s, LCP 2.0 s, TBT 0 ms, CLS
-  0.041. Chromium crashed only during the final full-page screenshot after
-  the audit data had been written; the reported categories and metrics are
-  complete.
+- The supplied `verify-url.sh` passed against the HTTPS root: HTTP 200, 833ms
+  load, no console/page errors, title/lang, one h1, main landmark, image alt
+  text, and labelled buttons.
+- Fresh desktop and phone Chromium contexts passed. The desktop first screen
+  shows the job and sample action; the phone has no horizontal overflow
+  (`390 === scrollWidth === clientWidth`) and the sample action is visible
+  before scrolling.
+- The live demo shows the persistent demo label, 3 populated beds, 7 open
+  windows, reset control, and start-real control. Normal-load traffic stayed on
+  `https://season-gap-garden.sociobot.in`; live desktop and phone had no console
+  or page errors.
+- Live AxeBuilder WCAG 2 A/AA found zero serious or critical violations. The
+  standalone `@axe-core/cli` could not launch Selenium against the image's
+  bundled Chrome, so the repository's Playwright Axe integration is the
+  authoritative Axe run for this worker.
+- A fresh live service-worker reload is controlled by `/sw.js`. The tagged
+  offline claim verifies the demo after going offline in its own context.
+- `/does-not-exist-repair-3` returns the expected HTTP 404 and the styled
+  **Page not found** page. Root, demo, query demo, legal pages, 404 page,
+  robots, sitemap, and manifest returned their expected statuses.
+- Live response headers include CSP with `frame-ancestors 'none'`,
+  `X-Frame-Options: DENY`, HSTS, nosniff, permissions policy, and strict-origin
+  referrer policy. The versioned hero image returned
+  `Cache-Control: public, max-age=31536000, immutable`.
+- Lighthouse mobile output was written to
+  `/work/.evidence/season-gap-garden-repair-3-live/lighthouse.json`: Performance
+  99, Accessibility 100, Best Practices 100, SEO 100; FCP 1.5s, LCP 2.0s,
+  TBT 0ms, CLS 0.039. Lighthouse completed the audit data but its final
+  full-page screenshot step crashed the tab; the JSON category and metric
+  values were written before that tool-side crash.
 
-## Known limitation / next action
+## Remaining items
 
-The public billing endpoint remains unregistered:
-`GET https://api.sociobot.in/api/v1/products/season-gap-garden/checkout`
-returns its documented 404 (`enabled factory product`). It is no longer a
-customer-facing defect because the release does not advertise or link to it.
-To enable the researched one-time monetization later, the factory must register
-and enable that exact product in the Sociobot billing engine, set
-`PAID_UNLOCK_AVAILABLE` to `true`, then run a real hosted checkout and verify
-the return `?license=` flow before advertising its price.
+There are no known product defects or unmet findings. The product still has no
+billing checkout because the factory has not registered the product in the
+Sociobot billing catalog. The UI makes no purchase offer, so this is an
+external dependency rather than a customer-facing failure.
 
-## Independent verification 3 (2026-08-28)
-
-**PASS — candidate `b08e2707c4665f81906a2c1396f050568e775443` is verified at
-https://season-gap-garden.sociobot.in/.** This verifier made no product-code
-changes. The live root and fresh candidate `dist/index.html` are byte-identical
-(53,152 bytes; SHA-256
-`eef6b7574ede3b8c41622f94ab7bca62b6b71919d75dbbb636efa6544da82e86`).
-
-Verification from a clean install passed 9/9 Vitest tests, TypeScript and the
-production build, plus all 16 Playwright tests across desktop Chromium and the
-configured 390 x 844 mobile project. Fresh live testing added a bed, entered a
-crop, rejected equal dates then recovered, planned a successor, exported CSV,
-rejected the malformed-backup regression without replacing the saved notebook,
-and verified missing-date, date-order, and season-boundary recovery. Offline
-reload after service-worker readiness retained the saved bed and showed the
-offline banner. A live `registration.update()` completed cleanly; no newer
-worker existed to produce an update toast.
-
-Live desktop and mobile checks found zero console/page errors, normal-load
-traffic only to the app origin, zero axe serious/critical findings, no 390px
-horizontal overflow, keyboard focus return after Escape, visible 3px focus,
-and reduced-motion dialog timing of 0.00001s. Mobile Lighthouse 13.4.1 scored
-93 Performance, 100 Accessibility, 100 Best Practices, and 100 SEO (FCP 0.9s,
-LCP 1.5s, TBT 300ms, CLS 0.044). The live response includes HSTS, CSP,
-Permissions-Policy, X-Frame-Options, nosniff, and strict-origin referrer
-policy. Full evidence and the one low-priority caching follow-up are in
-`.factory/verification-3.md`.
